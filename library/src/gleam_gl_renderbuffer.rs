@@ -1,58 +1,58 @@
+use std::rc::Rc;
+
 use array_box::ArrayBox;
 use gleam::gl::*;
-use std::rc::Rc;
-use value_box::{ValueBox, ValueBoxPointer};
+use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
 #[no_mangle]
 pub fn gleam_gen_renderbuffers(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     amount: GLsizei,
-    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
+    array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_array.with_not_null(|array| array.set_vector(gl.gen_renderbuffers(amount)))
-    });
+    gl.to_ref()
+        .and_then(|gl| array.with_mut(|array| array.set_vector(gl.gen_renderbuffers(amount))))
+        .log();
 }
 
 #[no_mangle]
-fn gleam_bind_renderbuffer(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    target: GLenum,
-    renderbuffer: GLuint,
-) {
-    _ptr_gl.with_not_null(|gl| gl.bind_renderbuffer(target, renderbuffer));
+fn gleam_bind_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum, renderbuffer: GLuint) {
+    gl.with_ref(|gl| gl.bind_renderbuffer(target, renderbuffer))
+        .log();
 }
 
 #[no_mangle]
 fn gleam_renderbuffer_storage(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     target: GLenum,
     internalformat: GLenum,
     width: GLsizei,
     height: GLsizei,
 ) {
-    _ptr_gl.with_not_null(|gl| gl.renderbuffer_storage(target, internalformat, width, height));
+    gl.with_ref(|gl| gl.renderbuffer_storage(target, internalformat, width, height))
+        .log();
 }
 
 #[no_mangle]
 fn gleam_delete_renderbuffers(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
+    array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_array.with_not_null(|array| gl.delete_renderbuffers(array.to_slice()))
-    })
+    gl.to_ref()
+        .and_then(|gl| array.with_ref(|array| gl.delete_renderbuffers(array.to_slice())))
+        .log();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////  H E L P E R S ////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 #[no_mangle]
-pub fn gleam_gen_renderbuffer(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
-    _ptr_gl.with_not_null_return(0, |gl| gl.gen_renderbuffers(1)[0])
+pub fn gleam_gen_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
+    gl.with_ref(|gl| gl.gen_renderbuffers(1)[0]).or_log(0)
 }
 
 #[no_mangle]
-pub fn gleam_delete_renderbuffer(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, renderbuffer: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.delete_renderbuffers(&[renderbuffer]))
+pub fn gleam_delete_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>, renderbuffer: GLuint) {
+    gl.with_ref(|gl| gl.delete_renderbuffers(&[renderbuffer]))
+        .log();
 }

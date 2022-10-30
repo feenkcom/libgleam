@@ -3,53 +3,56 @@ use std::rc::Rc;
 use array_box::ArrayBox;
 use gleam::gl::*;
 use string_box::StringBox;
-use value_box::{ValueBox, ValueBoxPointer};
+use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
 #[no_mangle]
-pub fn gleam_create_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
-    _ptr_gl.with_not_null_return(0, |gl| gl.create_program())
+pub fn gleam_create_program(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
+    gl.with_ref(|gl| gl.create_program()).or_log(0)
 }
 
 #[no_mangle]
-pub fn gleam_use_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, _program: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.use_program(_program));
+pub fn gleam_use_program(gl: *mut ValueBox<Rc<dyn Gl>>, program: GLuint) {
+    gl.with_ref(|gl| gl.use_program(program)).log();
 }
 
 #[no_mangle]
-pub fn gleam_link_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, _program: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.link_program(_program));
+pub fn gleam_link_program(gl: *mut ValueBox<Rc<dyn Gl>>, program: GLuint) {
+    gl.with_ref(|gl| gl.link_program(program)).log();
 }
 
 #[no_mangle]
-pub fn gleam_delete_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, _program: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.delete_program(_program));
+pub fn gleam_delete_program(gl: *mut ValueBox<Rc<dyn Gl>>, program: GLuint) {
+    gl.with_ref(|gl| gl.delete_program(program)).log();
 }
 
 #[no_mangle]
 pub fn gleam_get_program_iv(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
     pname: GLenum,
-    _ptr_array: *mut ValueBox<ArrayBox<GLint>>,
+    array: *mut ValueBox<ArrayBox<GLint>>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_array
-            .with_not_null(|array| unsafe { gl.get_program_iv(program, pname, array.to_slice()) })
-    });
+    gl.to_ref()
+        .and_then(|gl| {
+            array.with_ref(|array| unsafe { gl.get_program_iv(program, pname, array.to_slice()) })
+        })
+        .log();
 }
 
 #[no_mangle]
 pub fn gleam_get_program_info_log(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
-    _ptr_string: *mut ValueBox<StringBox>,
+    string: *mut ValueBox<StringBox>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_string.with_not_null(|string| string.set_string(gl.get_program_info_log(program)))
-    });
+    gl.to_ref()
+        .and_then(|gl| {
+            string.with_mut(|string| string.set_string(gl.get_program_info_log(program)))
+        })
+        .log();
 }
 
 #[no_mangle]
-pub fn gleam_validate_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, program: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.validate_program(program));
+pub fn gleam_validate_program(gl: *mut ValueBox<Rc<dyn Gl>>, program: GLuint) {
+    gl.with_ref(|gl| gl.validate_program(program)).log();
 }

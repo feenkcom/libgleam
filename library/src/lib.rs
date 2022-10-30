@@ -1,8 +1,10 @@
+#![allow(non_snake_case)]
+
 use std::os::raw::c_void;
 use std::rc::Rc;
 
 use string_box::StringBox;
-use value_box::{ValueBox, ValueBoxPointer};
+use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
 pub mod gleam_gl;
 pub mod gleam_gl_framebuffer;

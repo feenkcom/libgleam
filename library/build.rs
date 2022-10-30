@@ -62,18 +62,17 @@ fn main() {
 
     let _ = file_gl.write_all(
         "];\
-
 "
         .as_bytes(),
     );
 
     let _ = file_gl.write_all("
 #[no_mangle]
-pub fn gleam_enum_get_at_gl(_ptr_ident: *mut ValueBox<StringBox>, _ptr_value: *mut ValueBox<StringBox>, _ptr_type: *mut ValueBox<StringBox>, index: usize) {
+pub fn gleam_enum_get_at_gl(enum_ident: *mut ValueBox<StringBox>, enum_value: *mut ValueBox<StringBox>, enum_type: *mut ValueBox<StringBox>, index: usize) {
     let each_enum = GL_ENUMS[index];
-    _ptr_ident.with_not_null(|string| string.set_string(String::from(each_enum.0)));
-    _ptr_value.with_not_null(|string| string.set_string(String::from(each_enum.1)));
-    _ptr_type.with_not_null(|string| string.set_string(String::from(each_enum.2)));
+    enum_ident.with_mut(|enum_ident| enum_ident.set_string(String::from(each_enum.0))).log();
+    enum_value.with_mut(|enum_value| enum_value.set_string(String::from(each_enum.1))).log();
+    enum_type.with_mut(|enum_type| enum_type.set_string(String::from(each_enum.2))).log();
 }
 ".as_bytes());
 
@@ -105,8 +104,8 @@ pub fn gleam_enum_gl_{}() -> {} {{ {} }}
             format!(
                 "
 #[no_mangle]
-pub fn gleam_enum_type_gl_{}(_ptr_string: *mut ValueBox<StringBox>) {{
-    _ptr_string.with_not_null(|string| string.set_string(String::from({:?})) )
+pub fn gleam_enum_type_gl_{}(string: *mut ValueBox<StringBox>) {{
+    string.with_mut(|string| string.set_string(String::from({:?}))).log();
 }}
 ",
                 each_enum.ident.to_lowercase(),
