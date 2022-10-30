@@ -1,8 +1,9 @@
-use boxer::array::BoxerArray;
-use boxer::string::BoxerString;
-use boxer::{ValueBox, ValueBoxPointer};
-use gleam::gl::*;
 use std::rc::Rc;
+
+use array_box::ArrayBox;
+use gleam::gl::*;
+use string_box::StringBox;
+use value_box::{ValueBox, ValueBoxPointer};
 
 #[no_mangle]
 pub fn gleam_create_program(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
@@ -29,7 +30,7 @@ pub fn gleam_get_program_iv(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
     pname: GLenum,
-    _ptr_array: *mut ValueBox<BoxerArray<GLint>>,
+    _ptr_array: *mut ValueBox<ArrayBox<GLint>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_array
@@ -41,7 +42,7 @@ pub fn gleam_get_program_iv(
 pub fn gleam_get_program_info_log(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
-    _ptr_string: *mut ValueBox<BoxerString>,
+    _ptr_string: *mut ValueBox<StringBox>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_string.with_not_null(|string| string.set_string(gl.get_program_info_log(program)))

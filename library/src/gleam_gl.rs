@@ -1,50 +1,48 @@
-use boxer::array::BoxerArray;
-use boxer::string::BoxerString;
-use boxer::{assert_box, function};
-use boxer::{ValueBox, ValueBoxPointer};
+use array_box::ArrayBox;
 use gleam::gl::*;
 use std::rc::Rc;
+use string_box::StringBox;
+use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
 #[no_mangle]
-pub fn gleam_enable(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, cap: GLenum) {
-    _ptr_gl.with_not_null(|gl| gl.enable(cap));
+pub fn gleam_enable(gl: *mut ValueBox<Rc<dyn Gl>>, cap: GLenum) {
+    gl.with_ref(|gl| gl.enable(cap)).log();
 }
 
 #[no_mangle]
-pub fn gleam_disable(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, cap: GLenum) {
-    _ptr_gl.with_not_null(|gl| gl.disable(cap));
+pub fn gleam_disable(gl: *mut ValueBox<Rc<dyn Gl>>, cap: GLenum) {
+    gl.with_ref(|gl| gl.disable(cap)).log();
 }
 
 #[no_mangle]
-pub fn gleam_clear_color(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, r: f32, g: f32, b: f32, a: f32) {
-    _ptr_gl.with_not_null(|gl| gl.clear_color(r, g, b, a));
+pub fn gleam_clear_color(gl: *mut ValueBox<Rc<dyn Gl>>, r: f32, g: f32, b: f32, a: f32) {
+    gl.with_ref(|gl| gl.clear_color(r, g, b, a)).log();
 }
 
 #[no_mangle]
-pub fn gleam_clear_depth(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, depth: f64) {
-    _ptr_gl.with_not_null(|gl| gl.clear_depth(depth));
+pub fn gleam_clear_depth(gl: *mut ValueBox<Rc<dyn Gl>>, depth: f64) {
+    gl.with_ref(|gl| gl.clear_depth(depth)).log();
 }
 
 #[no_mangle]
-pub fn gleam_clear(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, buffer_mask: GLbitfield) {
-    _ptr_gl.with_not_null(|gl| gl.clear(buffer_mask));
+pub fn gleam_clear(gl: *mut ValueBox<Rc<dyn Gl>>, buffer_mask: GLbitfield) {
+    gl.with_ref(|gl| gl.clear(buffer_mask)).log();
 }
 
 #[no_mangle]
-pub fn gleam_get_error(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>) -> GLenum {
-    _ptr_gl.with_not_null_return(0, |gl| gl.get_error())
+pub fn gleam_get_error(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLenum {
+    gl.with_ref(|gl| gl.get_error()).or_log(0)
 }
 
 #[no_mangle]
 pub fn gleam_get_string(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     which: GLenum,
-    _ptr_string: *mut ValueBox<BoxerString>,
+    string: *mut ValueBox<StringBox>,
 ) {
-    assert_box(_ptr_gl, function!());
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_string.with_not_null(|string| string.set_string(gl.get_string(which)))
-    });
+    gl.to_ref()
+        .and_then(|gl| string.with_mut(|string| string.set_string(gl.get_string(which))))
+        .log();
 }
 
 #[no_mangle]
@@ -56,7 +54,7 @@ pub fn gleam_read_pixels(
     height: GLsizei,
     format: GLenum,
     pixel_type: GLenum,
-    _ptr_data: *mut ValueBox<BoxerArray<u8>>,
+    _ptr_data: *mut ValueBox<ArrayBox<u8>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_data.with_not_null(|data| {
@@ -73,7 +71,7 @@ pub fn gleam_get_tex_image_into_buffer(
     level: GLint,
     format: GLenum,
     ty: GLenum,
-    _ptr_data: *mut ValueBox<BoxerArray<u8>>,
+    _ptr_data: *mut ValueBox<ArrayBox<u8>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_data.with_not_null(|data| {
@@ -120,7 +118,7 @@ pub fn gleam_compile_shader(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, _shader: GLuint)
 pub fn gleam_shader_source(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     _shader: GLuint,
-    _ptr_source: *mut ValueBox<BoxerString>,
+    _ptr_source: *mut ValueBox<StringBox>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_source.with_not_null(|source| {
@@ -178,7 +176,7 @@ pub fn gleam_array_buffer_data_static_draw(
 pub fn gleam_get_attribute_location(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
-    _ptr_location: *mut ValueBox<BoxerString>,
+    _ptr_location: *mut ValueBox<StringBox>,
 ) -> i32 {
     _ptr_gl.with_not_null_return(0, |gl| {
         _ptr_location.with_not_null_return(0, |location| {
@@ -191,7 +189,7 @@ pub fn gleam_get_attribute_location(
 pub fn gleam_get_uniform_location(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     program: GLuint,
-    _ptr_location: *mut ValueBox<BoxerString>,
+    _ptr_location: *mut ValueBox<StringBox>,
 ) -> i32 {
     _ptr_gl.with_not_null_return(0, |gl| {
         _ptr_location.with_not_null_return(0, |location| {

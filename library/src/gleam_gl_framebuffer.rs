@@ -1,78 +1,79 @@
-use boxer::array::BoxerArray;
-use boxer::{ValueBox, ValueBoxPointer};
-use gleam::gl::*;
 use std::rc::Rc;
+
+use array_box::ArrayBox;
+use gleam::gl::*;
+use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
 #[no_mangle]
 pub fn gleam_gen_framebuffers(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     amount: GLsizei,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_array.with_not_null(|array| array.set_vector(gl.gen_framebuffers(amount)))
-    });
+    gl.to_ref()
+        .and_then(|gl| array.with_mut(|array| array.set_vector(gl.gen_framebuffers(amount))))
+        .log();
 }
 
 #[no_mangle]
-fn gleam_bind_framebuffer(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum, framebuffer: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.bind_framebuffer(target, framebuffer));
+fn gleam_bind_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum, framebuffer: GLuint) {
+    gl.with_ref(|gl| gl.bind_framebuffer(target, framebuffer))
+        .log();
 }
 
 #[no_mangle]
 fn gleam_framebuffer_texture_2d(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     target: GLenum,
     attachment: GLenum,
     textarget: GLenum,
     texture: GLuint,
     level: GLint,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        gl.framebuffer_texture_2d(target, attachment, textarget, texture, level)
-    });
+    gl.with_ref(|gl| gl.framebuffer_texture_2d(target, attachment, textarget, texture, level))
+        .log();
 }
 
 #[no_mangle]
 fn gleam_framebuffer_renderbuffer(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
     target: GLenum,
     attachment: GLenum,
     renderbuffertarget: GLenum,
     renderbuffer: GLuint,
 ) {
-    _ptr_gl.with_not_null(|gl| {
+    gl.with_ref(|gl| {
         gl.framebuffer_renderbuffer(target, attachment, renderbuffertarget, renderbuffer)
-    });
+    })
+    .log();
 }
 
 #[no_mangle]
-pub fn gleam_check_frame_buffer_status(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    target: GLenum,
-) -> GLenum {
-    _ptr_gl.with_not_null_return(0, |gl| gl.check_frame_buffer_status(target))
+pub fn gleam_check_frame_buffer_status(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum) -> GLenum {
+    gl.with_ref(|gl| gl.check_frame_buffer_status(target))
+        .or_log(0)
 }
 
 #[no_mangle]
 fn gleam_delete_framebuffers(
-    _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    gl: *mut ValueBox<Rc<dyn Gl>>,
+    array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    _ptr_gl.with_not_null(|gl| {
-        _ptr_array.with_not_null(|array| gl.delete_framebuffers(array.to_slice()))
-    })
+    gl.to_ref()
+        .and_then(|gl| array.with_ref(|array| gl.delete_framebuffers(array.to_slice())))
+        .log();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////  H E L P E R S ////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 #[no_mangle]
-pub fn gleam_gen_framebuffer(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
-    _ptr_gl.with_not_null_return(0, |gl| gl.gen_framebuffers(1)[0])
+pub fn gleam_gen_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
+    gl.with_ref(|gl| gl.gen_framebuffers(1)[0]).or_log(0)
 }
 
 #[no_mangle]
-pub fn gleam_delete_framebuffer(_ptr_gl: *mut ValueBox<Rc<dyn Gl>>, framebuffer: GLuint) {
-    _ptr_gl.with_not_null(|gl| gl.delete_framebuffers(&[framebuffer]))
+pub fn gleam_delete_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>, framebuffer: GLuint) {
+    gl.with_ref(|gl| gl.delete_framebuffers(&[framebuffer]))
+        .log();
 }

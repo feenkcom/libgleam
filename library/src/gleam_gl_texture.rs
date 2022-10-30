@@ -1,13 +1,13 @@
-use boxer::array::BoxerArray;
-use boxer::{ValueBox, ValueBoxPointer};
+use array_box::ArrayBox;
 use gleam::gl::*;
 use std::rc::Rc;
+use value_box::{ValueBox, ValueBoxPointer};
 
 #[no_mangle]
 pub fn gleam_gen_textures(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     amount: GLsizei,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_array.with_not_null(|array| array.set_vector(gl.gen_textures(amount)))
@@ -37,7 +37,7 @@ pub fn gleam_tex_parameter_i(
 #[no_mangle]
 fn gleam_delete_textures(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
     _ptr_gl
         .with_not_null(|gl| _ptr_array.with_not_null(|array| gl.delete_textures(array.to_slice())))
@@ -54,7 +54,7 @@ pub fn gleam_tex_image_2d(
     border: GLint,
     format: GLenum,
     ty: GLenum,
-    _ptr_data: *mut ValueBox<BoxerArray<u8>>,
+    _ptr_data: *mut ValueBox<ArrayBox<u8>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_data.with(
@@ -99,7 +99,7 @@ pub fn gleam_tex_sub_image_2d(
     height: GLsizei,
     format: GLenum,
     ty: GLenum,
-    _ptr_data: *mut ValueBox<BoxerArray<u8>>,
+    _ptr_data: *mut ValueBox<ArrayBox<u8>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_data.with_not_null(|data| {

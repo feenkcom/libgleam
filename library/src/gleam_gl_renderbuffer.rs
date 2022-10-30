@@ -1,13 +1,13 @@
-use boxer::array::BoxerArray;
-use boxer::{ValueBox, ValueBoxPointer};
+use array_box::ArrayBox;
 use gleam::gl::*;
 use std::rc::Rc;
+use value_box::{ValueBox, ValueBoxPointer};
 
 #[no_mangle]
 pub fn gleam_gen_renderbuffers(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
     amount: GLsizei,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_array.with_not_null(|array| array.set_vector(gl.gen_renderbuffers(amount)))
@@ -37,7 +37,7 @@ fn gleam_renderbuffer_storage(
 #[no_mangle]
 fn gleam_delete_renderbuffers(
     _ptr_gl: *mut ValueBox<Rc<dyn Gl>>,
-    _ptr_array: *mut ValueBox<BoxerArray<GLuint>>,
+    _ptr_array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
     _ptr_gl.with_not_null(|gl| {
         _ptr_array.with_not_null(|array| gl.delete_renderbuffers(array.to_slice()))
