@@ -16,9 +16,9 @@ fn gleam_uniform_matrix_4fv(
     transpose: bool,
     data: *mut ValueBox<ArrayBox<f32>>,
 ) {
-    gl.to_ref().and_then(|gl| {
-        data.with_ref(|data| {
-            gl.uniform_matrix_4fv(location, transpose, data.to_slice())
+    gl.to_ref()
+        .and_then(|gl| {
+            data.with_ref(|data| gl.uniform_matrix_4fv(location, transpose, data.to_slice()))
         })
-    }).log();
+        .log();
 }

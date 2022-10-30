@@ -246,6 +246,7 @@ dependencies = [
 name = "libgleam-builder"
 version = "0.1.0"
 dependencies = [
+ "libgleam-library",
  "shared-library-builder",
 ]
 
