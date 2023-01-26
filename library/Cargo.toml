@@ -1,15 +1,16 @@
 [package]
 name = "libgleam"
-version = "0.2.0"
+version = "1.0.0"
 build = "build.rs"
 authors = ["feenk gmbh. <contact@feenk.com>"]
 edition = "2021"
 
 [dependencies]
 gleam = "0.14"
-value-box = "1.1"
+value-box = "2.2"
 string-box = "1.1"
 array-box = "1.0"
+value-box-ffi = { version = "1.0", features = [ "array-box", "string-box"] }
 
 [build-dependencies]
 gl_generator = "0.14"

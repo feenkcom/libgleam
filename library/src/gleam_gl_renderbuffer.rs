@@ -10,14 +10,13 @@ pub fn gleam_gen_renderbuffers(
     amount: GLsizei,
     array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    gl.to_ref()
-        .and_then(|gl| array.with_mut(|array| array.set_vector(gl.gen_renderbuffers(amount))))
+    gl.with_ref(|gl| array.with_mut_ok(|array| array.set_vector(gl.gen_renderbuffers(amount))))
         .log();
 }
 
 #[no_mangle]
 fn gleam_bind_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum, renderbuffer: GLuint) {
-    gl.with_ref(|gl| gl.bind_renderbuffer(target, renderbuffer))
+    gl.with_ref_ok(|gl| gl.bind_renderbuffer(target, renderbuffer))
         .log();
 }
 
@@ -29,7 +28,7 @@ fn gleam_renderbuffer_storage(
     width: GLsizei,
     height: GLsizei,
 ) {
-    gl.with_ref(|gl| gl.renderbuffer_storage(target, internalformat, width, height))
+    gl.with_ref_ok(|gl| gl.renderbuffer_storage(target, internalformat, width, height))
         .log();
 }
 
@@ -38,8 +37,7 @@ fn gleam_delete_renderbuffers(
     gl: *mut ValueBox<Rc<dyn Gl>>,
     array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    gl.to_ref()
-        .and_then(|gl| array.with_ref(|array| gl.delete_renderbuffers(array.to_slice())))
+    gl.with_ref(|gl| array.with_ref_ok(|array| gl.delete_renderbuffers(array.to_slice())))
         .log();
 }
 
@@ -48,11 +46,11 @@ fn gleam_delete_renderbuffers(
 ///////////////////////////////////////////////////////////////////////////////////////
 #[no_mangle]
 pub fn gleam_gen_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
-    gl.with_ref(|gl| gl.gen_renderbuffers(1)[0]).or_log(0)
+    gl.with_ref_ok(|gl| gl.gen_renderbuffers(1)[0]).or_log(0)
 }
 
 #[no_mangle]
 pub fn gleam_delete_renderbuffer(gl: *mut ValueBox<Rc<dyn Gl>>, renderbuffer: GLuint) {
-    gl.with_ref(|gl| gl.delete_renderbuffers(&[renderbuffer]))
+    gl.with_ref_ok(|gl| gl.delete_renderbuffers(&[renderbuffer]))
         .log();
 }

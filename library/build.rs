@@ -70,9 +70,9 @@ fn main() {
 #[no_mangle]
 pub fn gleam_enum_get_at_gl(enum_ident: *mut ValueBox<StringBox>, enum_value: *mut ValueBox<StringBox>, enum_type: *mut ValueBox<StringBox>, index: usize) {
     let each_enum = GL_ENUMS[index];
-    enum_ident.with_mut(|enum_ident| enum_ident.set_string(String::from(each_enum.0))).log();
-    enum_value.with_mut(|enum_value| enum_value.set_string(String::from(each_enum.1))).log();
-    enum_type.with_mut(|enum_type| enum_type.set_string(String::from(each_enum.2))).log();
+    enum_ident.with_mut_ok(|enum_ident| enum_ident.set_string(String::from(each_enum.0))).log();
+    enum_value.with_mut_ok(|enum_value| enum_value.set_string(String::from(each_enum.1))).log();
+    enum_type.with_mut_ok(|enum_type| enum_type.set_string(String::from(each_enum.2))).log();
 }
 ".as_bytes());
 
@@ -105,7 +105,7 @@ pub fn gleam_enum_gl_{}() -> {} {{ {} }}
                 "
 #[no_mangle]
 pub fn gleam_enum_type_gl_{}(string: *mut ValueBox<StringBox>) {{
-    string.with_mut(|string| string.set_string(String::from({:?}))).log();
+    string.with_mut_ok(|string| string.set_string(String::from({:?}))).log();
 }}
 ",
                 each_enum.ident.to_lowercase(),

@@ -6,6 +6,8 @@ use std::rc::Rc;
 use string_box::StringBox;
 use value_box::{ReturnBoxerResult, ValueBox, ValueBoxPointer};
 
+pub use value_box_ffi::*;
+
 pub mod gleam_gl;
 pub mod gleam_gl_framebuffer;
 pub mod gleam_gl_program;

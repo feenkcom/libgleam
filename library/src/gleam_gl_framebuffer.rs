@@ -10,14 +10,13 @@ pub fn gleam_gen_framebuffers(
     amount: GLsizei,
     array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    gl.to_ref()
-        .and_then(|gl| array.with_mut(|array| array.set_vector(gl.gen_framebuffers(amount))))
+    gl.with_ref(|gl| array.with_mut_ok(|array| array.set_vector(gl.gen_framebuffers(amount))))
         .log();
 }
 
 #[no_mangle]
 fn gleam_bind_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum, framebuffer: GLuint) {
-    gl.with_ref(|gl| gl.bind_framebuffer(target, framebuffer))
+    gl.with_ref_ok(|gl| gl.bind_framebuffer(target, framebuffer))
         .log();
 }
 
@@ -30,7 +29,7 @@ fn gleam_framebuffer_texture_2d(
     texture: GLuint,
     level: GLint,
 ) {
-    gl.with_ref(|gl| gl.framebuffer_texture_2d(target, attachment, textarget, texture, level))
+    gl.with_ref_ok(|gl| gl.framebuffer_texture_2d(target, attachment, textarget, texture, level))
         .log();
 }
 
@@ -42,7 +41,7 @@ fn gleam_framebuffer_renderbuffer(
     renderbuffertarget: GLenum,
     renderbuffer: GLuint,
 ) {
-    gl.with_ref(|gl| {
+    gl.with_ref_ok(|gl| {
         gl.framebuffer_renderbuffer(target, attachment, renderbuffertarget, renderbuffer)
     })
     .log();
@@ -50,7 +49,7 @@ fn gleam_framebuffer_renderbuffer(
 
 #[no_mangle]
 pub fn gleam_check_frame_buffer_status(gl: *mut ValueBox<Rc<dyn Gl>>, target: GLenum) -> GLenum {
-    gl.with_ref(|gl| gl.check_frame_buffer_status(target))
+    gl.with_ref_ok(|gl| gl.check_frame_buffer_status(target))
         .or_log(0)
 }
 
@@ -59,8 +58,7 @@ fn gleam_delete_framebuffers(
     gl: *mut ValueBox<Rc<dyn Gl>>,
     array: *mut ValueBox<ArrayBox<GLuint>>,
 ) {
-    gl.to_ref()
-        .and_then(|gl| array.with_ref(|array| gl.delete_framebuffers(array.to_slice())))
+    gl.with_ref(|gl| array.with_ref_ok(|array| gl.delete_framebuffers(array.to_slice())))
         .log();
 }
 
@@ -69,11 +67,11 @@ fn gleam_delete_framebuffers(
 ///////////////////////////////////////////////////////////////////////////////////////
 #[no_mangle]
 pub fn gleam_gen_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>) -> GLuint {
-    gl.with_ref(|gl| gl.gen_framebuffers(1)[0]).or_log(0)
+    gl.with_ref_ok(|gl| gl.gen_framebuffers(1)[0]).or_log(0)
 }
 
 #[no_mangle]
 pub fn gleam_delete_framebuffer(gl: *mut ValueBox<Rc<dyn Gl>>, framebuffer: GLuint) {
-    gl.with_ref(|gl| gl.delete_framebuffers(&[framebuffer]))
+    gl.with_ref_ok(|gl| gl.delete_framebuffers(&[framebuffer]))
         .log();
 }
